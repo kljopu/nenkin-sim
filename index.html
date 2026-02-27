@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>年金受給額シミュレーター 2025 | 老齢基礎・厚生年金を簡単計算</title>
+<meta name="description" content="令和7年度対応。老齢基礎年金・老齢厚生年金の受給額を自動計算。繰り上げ・繰り下げ受給の損益分岐点も確認できます。国民年金・会社員どちらも対応。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+<!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXXX" crossorigin="anonymous"></script> -->
+<style>
+  :root {
+    --primary:#7C3AED; --primary-light:#F5F3FF;
+    --accent:#10B981; --danger:#EF4444; --warn:#F59E0B;
+    --text:#1E293B; --text-sub:#64748B; --border:#E2E8F0;
+    --bg:#F8FAFC; --card:#FFFFFF;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.04);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:15px;}
+
+  header{background:linear-gradient(135deg,#4C1D95 0%,#7C3AED 60%,#A78BFA 100%);color:white;padding:28px 20px 24px;text-align:center;}
+  header h1{font-size:1.4rem;font-weight:700;margin-bottom:6px;}
+  header p{font-size:.82rem;opacity:.88;}
+  .badge-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .badge{background:rgba(255,255,255,.18);border-radius:20px;padding:3px 10px;font-size:.72rem;font-weight:600;}
+
+  .container{max-width:540px;margin:0 auto;padding:16px;}
+  .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:20px;margin-bottom:16px;}
+  .card-title{font-size:.8rem;font-weight:700;letter-spacing:.06em;color:var(--text-sub);text-transform:uppercase;margin-bottom:16px;}
+
+  label{display:block;font-size:.82rem;font-weight:600;color:var(--text-sub);margin-bottom:6px;margin-top:16px;}
+  label:first-of-type{margin-top:0;}
+  .val-display{font-size:1.4rem;font-weight:700;color:var(--primary);}
+  .sub-note{font-size:.75rem;color:var(--text-sub);margin-top:3px;line-height:1.5;}
+  input[type=range]{width:100%;accent-color:var(--primary);}
+  select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:10px;font-family:inherit;font-size:.92rem;background:white;color:var(--text);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2364748B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;cursor:pointer;}
+
+  .toggle-row{display:flex;background:#F1F5F9;border-radius:10px;padding:3px;margin-bottom:4px;}
+  .toggle-btn{flex:1;padding:8px;border:none;background:transparent;font-family:inherit;font-size:.85rem;font-weight:600;color:var(--text-sub);border-radius:8px;cursor:pointer;transition:.15s;}
+  .toggle-btn.active{background:white;color:var(--primary);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+
+  /* Hero */
+  .hero{background:linear-gradient(135deg,#4C1D95,#7C3AED);color:white;border-radius:16px;padding:24px 20px;margin-bottom:16px;text-align:center;}
+  .hero-label{font-size:.8rem;opacity:.85;margin-bottom:4px;}
+  .hero-amount{font-size:2.4rem;font-weight:700;letter-spacing:-.02em;}
+  .hero-sub{font-size:.82rem;opacity:.8;margin-top:4px;}
+  .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+  .hero-item{background:rgba(255,255,255,.12);border-radius:10px;padding:12px;}
+  .hero-item-label{font-size:.72rem;opacity:.8;margin-bottom:4px;}
+  .hero-item-val{font-size:1.15rem;font-weight:700;}
+
+  /* Breakdown table */
+  .bk-table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  .bk-table tr{border-bottom:1px solid #F1F5F9;}
+  .bk-table tr:last-child{border-bottom:none;}
+  .bk-table td{padding:9px 4px;}
+  .bk-table td:last-child{text-align:right;font-weight:600;}
+  .row-total td{font-weight:700;font-size:.92rem;border-top:2px solid var(--border);padding-top:12px;}
+  .tag{display:inline-block;font-size:.65rem;background:#F1F5F9;color:var(--text-sub);border-radius:4px;padding:1px 5px;margin-left:4px;}
+  .tag-purple{background:#F5F3FF;color:#6D28D9;}
+
+  /* Timing comparison */
+  .timing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px;}
+  .timing-card{border:1.5px solid var(--border);border-radius:12px;padding:12px 8px;text-align:center;}
+  .timing-card.highlight{border-color:#7C3AED;background:var(--primary-light);}
+  .timing-label{font-size:.72rem;color:var(--text-sub);margin-bottom:4px;}
+  .timing-age{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:2px;}
+  .timing-amount{font-size:1rem;font-weight:700;color:var(--primary);}
+  .timing-note{font-size:.65rem;color:var(--text-sub);margin-top:3px;}
+  .timing-change{font-size:.7rem;font-weight:700;margin-top:4px;}
+  .up{color:var(--accent);}
+  .down{color:var(--danger);}
+
+  /* 損益分岐点 */
+  .breakeven-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #F1F5F9;font-size:.85rem;}
+  .breakeven-row:last-child{border-bottom:none;}
+
+  /* Cross link */
+  .cross-link{display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;border-radius:12px;padding:14px 16px;text-decoration:none;color:#1D4ED8;margin-bottom:16px;border:1.5px solid #BFDBFE;transition:background .15s;}
+  .cross-link:hover{background:#DBEAFE;}
+  .cross-link-sub{font-size:.75rem;color:#3B82F6;margin-top:2px;font-weight:400;}
+
+  /* ref */
+  .ref-list{display:flex;flex-direction:column;gap:8px;}
+  .ref-item{background:#F8FAFC;border-radius:10px;border:1px solid var(--border);overflow:hidden;}
+  .ref-item summary{display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer;list-style:none;font-size:.85rem;font-weight:600;}
+  .ref-item summary::-webkit-details-marker{display:none;}
+  .ref-item summary:hover{background:#F1F5F9;}
+  .ref-item[open] summary{background:var(--primary-light);border-bottom:1px solid var(--border);}
+  .ref-icon{font-size:1rem;flex-shrink:0;}
+  .ref-name{flex:1;}
+  .ref-tag{display:inline-block;font-size:.65rem;background:#F0FDF4;color:#15803D;border-radius:4px;padding:1px 6px;margin-left:6px;}
+  .ref-arrow{font-size:.75rem;color:var(--text-sub);transition:transform .2s;}
+  .ref-item[open] .ref-arrow{transform:rotate(90deg);}
+  .ref-body{padding:12px 14px;font-size:.8rem;line-height:1.7;color:var(--text-sub);}
+  .ref-link{color:var(--primary);text-decoration:none;}
+  .ref-link:hover{text-decoration:underline;}
+
+  .ad-wrap{min-height:90px;margin-bottom:16px;border-radius:10px;overflow:hidden;}
+  .ad-wrap ins:empty{display:block;min-height:90px;background:#f1f5f9;}
+
+  .alert{padding:10px 14px;border-radius:10px;font-size:.8rem;margin-bottom:12px;line-height:1.6;}
+  .alert-warn{background:#FFFBEB;border-left:3px solid var(--warn);color:#92400E;}
+  .alert-ok{background:#F0FDF4;border-left:3px solid var(--accent);color:#14532D;}
+
+  footer{text-align:center;padding:20px;font-size:.75rem;color:var(--text-sub);}
+  footer a{color:var(--text-sub);text-decoration:none;margin:0 8px;}
+  footer a:hover{text-decoration:underline;}
+
+  @media(max-width:400px){.timing-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏦 年金受給額シミュレーター</h1>
+  <p>老齢基礎年金・厚生年金の受給額を令和7年度基準で計算</p>
+  <div class="badge-row">
+    <span class="badge">令和7年度対応</span>
+    <span class="badge">繰り上げ/繰り下げ比較</span>
+    <span class="badge">損益分岐点計算</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- AdSense top -->
+  <div class="ad-wrap">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX"
+         data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- Input card -->
+  <div class="card">
+    <div class="card-title">👤 あなたの情報</div>
+
+    <label>年金の種類</label>
+    <div class="toggle-row">
+      <button class="toggle-btn active" onclick="setType('kousei',this)">会社員・公務員<br><small style="font-weight:400;font-size:.72rem;">厚生年金あり</small></button>
+      <button class="toggle-btn"        onclick="setType('kokumin',this)">自営業・フリーランス<br><small style="font-weight:400;font-size:.72rem;">国民年金のみ</small></button>
+    </div>
+
+    <label>現在の年齢</label>
+    <div class="val-display" id="age-disp">35 歳</div>
+    <input type="range" id="age-slider" min="20" max="64" step="1" value="35" oninput="onAgeSlider()">
+
+    <div id="salary-section">
+      <label>平均月収（税込）<span style="font-size:.72rem;font-weight:400;"> — 厚生年金計算の基礎</span></label>
+      <div class="val-display" id="salary-disp">300,000 円</div>
+      <input type="range" id="salary-slider" min="80000" max="650000" step="10000" value="300000" oninput="onSalarySlider()">
+      <div class="sub-note">標準報酬月額の上限: 650,000円 / 下限: 88,000円</div>
+    </div>
+
+    <label>国民年金 納付済み月数（見込み含む）</label>
+    <div class="val-display" id="months-disp">—</div>
+    <input type="range" id="months-slider" min="120" max="480" step="12" value="480" oninput="onMonthsSlider()">
+    <div class="sub-note" id="months-note">※ 20歳〜60歳まで40年（480ヶ月）が満額の条件です</div>
+
+    <label>受給開始年齢</label>
+    <select id="receive-age" onchange="calc()">
+      <option value="60">60歳（繰り上げ）— 最大24%減額</option>
+      <option value="61">61歳（繰り上げ）</option>
+      <option value="62">62歳（繰り上げ）</option>
+      <option value="63">63歳（繰り上げ）</option>
+      <option value="64">64歳（繰り上げ）</option>
+      <option value="65" selected>65歳（通常）</option>
+      <option value="66">66歳（繰り下げ）</option>
+      <option value="67">67歳（繰り下げ）</option>
+      <option value="68">68歳（繰り下げ）</option>
+      <option value="69">69歳（繰り下げ）</option>
+      <option value="70">70歳（繰り下げ）— 42%増額</option>
+      <option value="75">75歳（繰り下げ）— 最大84%増額</option>
+    </select>
+  </div>
+
+  <!-- Hero result -->
+  <div class="hero">
+    <div class="hero-label">月々の年金受給額（見込み）</div>
+    <div class="hero-amount" id="total-monthly">—</div>
+    <div class="hero-sub" id="hero-sub-txt">65歳受給開始 通常</div>
+    <div class="hero-grid">
+      <div class="hero-item">
+        <div class="hero-item-label">老齢基礎年金</div>
+        <div class="hero-item-val" id="kiso-monthly">—</div>
+      </div>
+      <div class="hero-item">
+        <div class="hero-item-label" id="kousei-label">老齢厚生年金</div>
+        <div class="hero-item-val" id="kousei-monthly">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breakdown -->
+  <div class="card">
+    <div class="card-title">📋 年金内訳</div>
+    <table class="bk-table" id="bk-table"></table>
+  </div>
+
+  <!-- AdSense mid -->
+  <div class="ad-wrap">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX"
+         data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+  <!-- Timing comparison -->
+  <div class="card">
+    <div class="card-title">⏱️ 受給開始時期の比較</div>
+    <p style="font-size:.78rem;color:var(--text-sub);margin-bottom:12px;">60〜75歳の受給額比較（月額）</p>
+    <div class="timing-grid" id="timing-grid"></div>
+  </div>
+
+  <!-- 損益分岐点 -->
+  <div class="card">
+    <div class="card-title">📊 損益分岐点（何歳まで生きれば得か）</div>
+    <p style="font-size:.78rem;color:var(--text-sub);margin-bottom:12px;">65歳受給を基準としたときの損益分岐年齢</p>
+    <div id="breakeven-list"></div>
+    <div class="alert alert-ok" style="margin-top:12px;margin-bottom:0;">
+      💡 日本人の平均寿命は男性約81歳・女性約87歳（令和5年簡易生命表）。長寿の傾向があれば繰り下げが有利です。
+    </div>
+  </div>
+
+  <!-- Cross link -->
+  <a class="cross-link" href="https://tetori-calc.com" target="_blank" rel="noopener">
+    <div>
+      <div style="font-size:.88rem;font-weight:600;">💴 現役時代の手取りを確認</div>
+      <div class="cross-link-sub">給与から手取りを計算 → tetori-calc.com</div>
+    </div>
+    <span style="font-size:1.2rem;">↗</span>
+  </a>
+
+  <!-- 出典 -->
+  <div class="card">
+    <div class="card-title">📚 計算の根拠・参考資料</div>
+    <div class="ref-list">
+
+      <details class="ref-item">
+        <summary>
+          <span class="ref-icon">🏦</span>
+          <span class="ref-name">老齢基礎年金 満額 69,308円/月 <span class="ref-tag">令和7年度</span></span>
+          <span class="ref-arrow">›</span>
+        </summary>
+        <div class="ref-body">
+          令和7年度（2025年度）の老齢基礎年金満額は月額69,308円・年額831,700円（昭和31年4月2日以後生まれ）。令和6年度から1.9%引き上げ。20〜60歳の40年間（480ヶ月）全額納付した場合の金額です。<br>
+          <a href="https://www.nenkin.go.jp/oshirase/taisetu/2025/202504/040102.html" class="ref-link" target="_blank" rel="noopener">日本年金機構 令和7年度年金額 ↗</a>
+        </div>
+      </details>
+
+      <details class="ref-item">
+        <summary>
+          <span class="ref-icon">💼</span>
+          <span class="ref-name">老齢厚生年金 計算乗率 5.481/1000 <span class="ref-tag">H15.4以降</span></span>
+          <span class="ref-arrow">›</span>
+        </summary>
+        <div class="ref-body">
+          平成15年4月以降の被保険者期間：平均標準報酬額 × 5.481/1000 × 加入月数。平成15年3月以前は7.125/1000。本シミュレーターは平成15年4月以降の乗率で統一計算しています（簡略化）。<br>
+          <a href="https://www.nenkin.go.jp/service/yougo/hagyo/hoshuhirei.html" class="ref-link" target="_blank" rel="noopener">日本年金機構 報酬比例部分の計算 ↗</a>
+        </div>
+      </details>
+
+      <details class="ref-item">
+        <summary>
+          <span class="ref-icon">⏱️</span>
+          <span class="ref-name">繰り上げ・繰り下げ受給</span>
+          <span class="ref-arrow">›</span>
+        </summary>
+        <div class="ref-body">
+          繰り上げ受給（60〜64歳）: 1ヶ月につき0.4%減額。繰り下げ受給（66〜75歳）: 1ヶ月につき0.7%増額。最大84%増（75歳受給開始）。繰り下げは老齢厚生年金のみの繰り下げも可能です。<br>
+          <a href="https://www.nenkin.go.jp/service/jukyu/seido/roureinenkin/kuriage-kurisage/20140421.html" class="ref-link" target="_blank" rel="noopener">日本年金機構 繰り上げ・繰り下げ受給 ↗</a>
+        </div>
+      </details>
+
+      <details class="ref-item">
+        <summary>
+          <span class="ref-icon">📋</span>
+          <span class="ref-name">受給資格期間・注意事項</span>
+          <span class="ref-arrow">›</span>
+        </summary>
+        <div class="ref-body">
+          老齢年金の受給には原則として10年（120ヶ月）以上の受給資格期間が必要です。本シミュレーターは概算値であり、実際の年金額は日本年金機構の「ねんきんネット」またはねんきん定期便でご確認ください。<br>
+          <a href="https://www.nenkin.go.jp/n_net/" class="ref-link" target="_blank" rel="noopener">ねんきんネット ↗</a>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+  <!-- AdSense bottom -->
+  <div class="ad-wrap">
+    <ins class="adsbygoogle" style="display:block"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXXX" data-ad-slot="XXXXXXXXXX"
+         data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </div>
+
+</div>
+
+<footer>
+  <a href="/privacy.html">プライバシーポリシー</a>
+  <a href="https://tetori-calc.com" target="_blank">手取り計算機</a>
+  <a href="https://yachin-keisan.com" target="_blank">家賃計算機</a>
+  <p style="margin-top:8px;">© 2026 年金シミュレーター | 本計算結果はあくまで目安です。正確な金額はねんきんネットでご確認ください。</p>
+</footer>
+
+<script>
+// ── 定数 ──
+const KISO_FULL_MONTHLY = 69308;   // 令和7年度 老齢基礎年金満額 月額
+const KOUSEI_RATE = 5.481 / 1000;  // 平成15年4月以降 報酬比例部分乗率
+
+let _type = 'kousei'; // 'kousei' | 'kokumin'
+
+function setType(t, btn) {
+  _type = t;
+  document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('salary-section').style.display = t === 'kousei' ? '' : 'none';
+  document.getElementById('kousei-label').textContent = t === 'kousei' ? '老齢厚生年金' : '（なし）';
+  calc();
+}
+
+function onAgeSlider() {
+  const age = +document.getElementById('age-slider').value;
+  document.getElementById('age-disp').textContent = age + ' 歳';
+  // 残り加入見込み月数を自動推定
+  const remaining = Math.max(0, (60 - age) * 12);
+  const currentMonths = Math.min(480, remaining + (age - 20) * 12);
+  const s = document.getElementById('months-slider');
+  s.value = Math.max(120, Math.min(480, currentMonths));
+  onMonthsSlider();
+  calc();
+}
+
+function onSalarySlider() {
+  const v = +document.getElementById('salary-slider').value;
+  document.getElementById('salary-disp').textContent = v.toLocaleString('ja-JP') + ' 円';
+  calc();
+}
+
+function onMonthsSlider() {
+  const m = +document.getElementById('months-slider').value;
+  const yrs = Math.floor(m / 12);
+  const mos = m % 12;
+  document.getElementById('months-disp').textContent = `${m} ヶ月（${yrs}年${mos > 0 ? mos+'ヶ月' : ''}）`;
+  calc();
+}
+
+function fmt(n) { return Math.round(n).toLocaleString('ja-JP') + ' 円'; }
+function fmtMan(n) { return (Math.round(n/10000)).toLocaleString('ja-JP') + ' 万円'; }
+
+// 繰り上げ/繰り下げ倍率
+function adjustRate(startAge) {
+  const diff = startAge - 65;
+  if (diff < 0) return 1 + diff * 12 * (-0.004); // 繰り上げ 0.4%/月減
+  if (diff > 0) return 1 + diff * 12 * 0.007;    // 繰り下げ 0.7%/月増
+  return 1;
+}
+
+function calcMonthly(startAge, months, salary) {
+  const rate = adjustRate(startAge);
+  const kiso = KISO_FULL_MONTHLY * (months / 480) * rate;
+  const kousei = _type === 'kousei' ? salary * KOUSEI_RATE * Math.min(months, 480) * rate : 0;
+  return { kiso: Math.round(kiso), kousei: Math.round(kousei), total: Math.round(kiso + kousei) };
+}
+
+function calc() {
+  const months  = +document.getElementById('months-slider').value;
+  const salary  = +document.getElementById('salary-slider').value;
+  const startAge= +document.getElementById('receive-age').value;
+
+  const r = calcMonthly(startAge, months, salary);
+
+  // Hero
+  document.getElementById('total-monthly').textContent = fmt(r.total);
+  document.getElementById('kiso-monthly').textContent  = fmt(r.kiso);
+  document.getElementById('kousei-monthly').textContent = _type === 'kousei' ? fmt(r.kousei) : '—';
+  const diffPct = Math.round((adjustRate(startAge) - 1) * 100);
+  const diffTxt = diffPct > 0 ? `+${diffPct}%増額（繰り下げ）` : diffPct < 0 ? `${diffPct}%減額（繰り上げ）` : '通常受給';
+  document.getElementById('hero-sub-txt').textContent = `${startAge}歳受給開始 / ${diffTxt}`;
+
+  // Breakdown table
+  const bkt = document.getElementById('bk-table');
+  bkt.innerHTML = '';
+  const rows = [
+    { label: '老齢基礎年金（月額）',  val: r.kiso },
+  ];
+  if (_type === 'kousei') rows.push({ label: '老齢厚生年金（月額）', val: r.kousei });
+  rows.push(
+    { label: '合計月額', val: r.total, total: true },
+    { label: '合計年額', val: r.total * 12, total: true },
+  );
+  rows.forEach(row => {
+    const tr = document.createElement('tr');
+    if (row.total) tr.className = 'row-total';
+    tr.innerHTML = `<td>${row.label}</td><td>${fmt(row.val)}</td>`;
+    bkt.appendChild(tr);
+  });
+
+  // Timing grid
+  const timingGrid = document.getElementById('timing-grid');
+  timingGrid.innerHTML = '';
+  const timings = [
+    {age:60, label:'繰り上げ'},
+    {age:65, label:'通常'},
+    {age:70, label:'繰り下げ'},
+  ];
+  timings.forEach(t => {
+    const tr = calcMonthly(t.age, months, salary);
+    const pct = Math.round((adjustRate(t.age) - 1) * 100);
+    const div = document.createElement('div');
+    div.className = 'timing-card' + (t.age === startAge ? ' highlight' : '');
+    div.innerHTML = `
+      <div class="timing-label">${t.label}</div>
+      <div class="timing-age">${t.age}歳〜</div>
+      <div class="timing-amount">${fmt(tr.total)}</div>
+      <div class="timing-note">年額 ${fmtMan(tr.total * 12)}</div>
+      <div class="timing-change ${pct > 0 ? 'up' : pct < 0 ? 'down' : ''}">${pct > 0 ? '+'+pct : pct}%</div>`;
+    timingGrid.appendChild(div);
+  });
+
+  // 損益分岐点
+  const r65 = calcMonthly(65, months, salary);
+  const breakeven = document.getElementById('breakeven-list');
+  breakeven.innerHTML = '';
+
+  [
+    {age:60, label:'60歳受給 vs 65歳受給'},
+    {age:70, label:'70歳受給 vs 65歳受給'},
+    {age:75, label:'75歳受給 vs 65歳受給'},
+  ].forEach(({age, label}) => {
+    const rX = calcMonthly(age, months, salary);
+    // 損益分岐: 何ヶ月後に合計額が逆転するか
+    let be;
+    if (age < 65) {
+      // 繰り上げ: 早くもらえるが月額少ない → diff = 65-age年分の受給メリット
+      const earlyGain = rX.total * (65 - age) * 12; // 65歳まで多くもらえた分
+      const monthlyLoss = r65.total - rX.total;      // 月々の損失
+      be = monthlyLoss > 0 ? Math.round(earlyGain / monthlyLoss / 12) + age : null;
+    } else {
+      // 繰り下げ: 受給開始まで損 → diff = age-65年分の損
+      const delayLoss = r65.total * (age - 65) * 12; // 待機中にもらえなかった分
+      const monthlyGain = rX.total - r65.total;       // 月々の利得
+      be = monthlyGain > 0 ? Math.round(delayLoss / monthlyGain / 12) + age : null;
+    }
+
+    const div = document.createElement('div');
+    div.className = 'breakeven-row';
+    div.innerHTML = `<span>${label}</span><span style="font-weight:700;color:var(--primary)">${be ? be + '歳から得' : '計算不可'}</span>`;
+    breakeven.appendChild(div);
+  });
+}
+
+// Init
+onAgeSlider();
+</script>
+</body>
+</html>
